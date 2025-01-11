@@ -1,5 +1,9 @@
 # Distributed Database Implementation with Oracle and Docker
 
+> **_NOTE:_** This project is an assignment for my Master's degree program.
+
+you can download the full documentation here [![Google Drive](https://img.shields.io/badge/Google%20Drive-4285F4?style=for-the-badge&logo=googledrive&logoColor=white)](https://drive.google.com/file/d/1l22aSvolZ7MQjur8ZywhvzftMnT4FayJ/view?usp=sharing)
+
 ## Introduction
 This project implements a distributed database system using Oracle Database and Docker. The objective is to leverage sharding techniques for improved scalability and performance.
 
@@ -224,21 +228,21 @@ BUILD IMMEDIATE
 REFRESH FORCE
 ON DEMAND
 AS
-SELECT * FROM OrderItems@inventory_na_link WHERE 1 = 0;
+SELECT * FROM OrderItems@inventory_na_link;
 
 CREATE MATERIALIZED VIEW shipment_mv
 BUILD IMMEDIATE 
 REFRESH FORCE
 ON DEMAND
 AS
-SELECT * FROM SHIPMENT@inventory_na_link WHERE 1 = 0;
+SELECT * FROM SHIPMENTS@inventory_eu_link;
 
 CREATE MATERIALIZED VIEW supplier_mv
 BUILD IMMEDIATE 
 REFRESH FORCE
 ON DEMAND
 AS
-SELECT * FROM SUPPLIER@inventory_na_link WHERE 1 = 0;
+SELECT * FROM SUPPLIER@inventory_eu_link;
 
 
 CREATE MATERIALIZED VIEW customer_mv
@@ -375,20 +379,29 @@ END VERIFY_MATERIALIZED_VIEW_CUSTOMER_SYN;
 ### Scheduling Integrity Checks
 ```sql
 BEGIN
-    DBMS_SCHEDULER.CREATE_JOB (
-        job_name        => 'Integrity_Check_Job',
-        job_type        => 'PLSQL_BLOCK',
-        job_action      => 'BEGIN Check_Integrity; END;',
-        start_date      => SYSDATE,
-        repeat_interval => 'FREQ=DAILY; BYHOUR=00; BYMINUTE=00; BYSECOND=0',
-        enabled         => TRUE
-    );
+  DBMS_SCHEDULER.CREATE_JOB (
+    job_name        => 'VERIFY_MV_SYNC_JOB',
+    job_type        => 'STORED_PROCEDURE',
+    job_action      => 'VERIFY_MATERIALIZED_VIEW_CUSTOMER_SYN', 
+    start_date      => SYSTIMESTAMP,
+    repeat_interval => 'FREQ=DAILY;BYHOUR=0;BYMINUTE=0;BYSECOND=0',
+    enabled         => TRUE,
+    comments        => 'Verifies if the materialized view is in sync with the source data'
+  );
 END;
 /
 ```
 
 ---
 
-## Conclusion
-This README covers the steps for setting up a distributed database system using Oracle Database and Docker. By implementing horizontal, vertical, and mixed fragmentation, along with DBLinks and materialized views, we achieve scalability and data synchronization across the system.
+## Contributors ✨
+
+<table>
+  <tbody>
+    <tr>
+      <td align="center"><a href="https://jamalidaissa.vercel.app"><img src="https://avatars.githubusercontent.com/u/69154853?v=4" width="100px;" alt="Jamal Id Aissa"/><br /><sub><b>Jamal Id Aissa</b></sub></a></td>
+    </tr>
+  </tbody>
+</table>
+
 
